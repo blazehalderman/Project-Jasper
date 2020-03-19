@@ -1,1 +1,1 @@
-from .models import (random, BattleshipGameClass, PlayerClass)
+from .models import (random, ShipClass, BattleshipGameClass, PlayerClass)
