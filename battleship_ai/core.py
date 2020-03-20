@@ -20,10 +20,10 @@ default_ship_array.append(ship_patrol)
 
 # initialize board
 
-player_board = BoardClass("player_board.txt")
+player_board = BoardClass("board.txt")
 player_board.read_board_file(player_board.file)
 
-enemy_board = BoardClass("enemy_board.txt")
+enemy_board = BoardClass("board.txt")
 enemy_board.read_board_file(enemy_board.file)
 
 player_board.clean_board_file(player_board.board_data)
