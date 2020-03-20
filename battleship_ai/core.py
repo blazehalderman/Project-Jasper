@@ -1,4 +1,4 @@
-from .models import(ShipClass, PlayerClass, BattleshipGameClass)
+from .models import(BoardClass, ShipClass, PlayerClass, BattleshipGameClass)
 
 # core game function (read, write, storing contents)
 
@@ -20,13 +20,13 @@ default_ship_array.append(ship_patrol)
 
 # initialize board
 
-def read_board_file(file):
-    with open(file) as f:
-        board_array = f.readlines()
-    f.closed
-    return (board_array)
+player_board = BoardClass("player_board.txt")
+player_board.read_board_file(player_board.file)
 
-board_array = read_board_file("board.txt")
+enemy_board = BoardClass("enemy_board.txt")
+enemy_board.read_board_file(enemy_board.file)
+
+player_board.clean_board_file(player_board.board_data)
 
 # gets player name
 

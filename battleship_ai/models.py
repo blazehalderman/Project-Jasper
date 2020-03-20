@@ -2,7 +2,26 @@ import random
 
 # models for game pieces, players, ships, board(s)
 
-#Default Ship class
+#Board class
+
+class BoardClass:
+    def __init__(self, file):
+        self.board_data = [[]]
+        self.file = file
+
+    def read_board_file(self, file):
+        with open(file) as f:
+            for line in f:
+                self.board_data.append(line.strip().split('\n'))
+        f.closed
+    
+    def clean_board_file(self, board_data):
+        for row in range(len(board_data)):
+            for col in range(len(board_data[row])):
+                # if letter then run coord assignment function for piece
+
+                print(board_data[row][col])
+
 
 #Ship class
 class ShipClass:
