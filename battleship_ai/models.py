@@ -2,26 +2,39 @@ import random
 
 # models for game pieces, players, ships, board(s)
 
-#Board class
+#Piece class
 
+class PieceClass:
+    def __init__(self):
+        self.rowX = 0
+        self.colY = 0
+
+#Board class
 class BoardClass:
     def __init__(self, file):
-        self.board_data = [[]]
         self.file = file
+        self.board_data = []
+        self.board_pieces = []
 
-    def read_board_file(self, file):
-        with open(file) as f:
+    def read_board_file(self):
+        with open(self.file) as f:
             for line in f:
-                self.board_data.append(line.strip().split('\n'))
+                for i in line.strip().split('\n'):
+                    self.board_data.append(i)
         f.closed
     
-    def clean_board_file(self, board_data):
-        for row in range(len(board_data)):
-            for col in range(len(board_data[row])):
-                # if letter then run coord assignment function for piece
-
-                print(board_data[row][col])
-
+    def clean_board_file(self):
+        for row in range(len(self.board_data)):
+            for col in range(len(self.board_data[row])):
+                # if a | run data function for gathering points
+                if(self.board_data[row][col].find('| |') == True):
+                    #self.piece_validation(self.board_data[row][col], row, col)
+                    print(self.board_data[row][col])
+    
+    '''def piece_validation(self, current_cord, row, col):
+        if(current_cord[row][col + 1] == ' ' and current_cord[row][col + 2] == '|'):
+            PieceLock = current_cord[row][col + 1]
+            print(PieceLock)'''
 
 #Ship class
 class ShipClass:
