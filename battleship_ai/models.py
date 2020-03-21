@@ -5,10 +5,12 @@ import random
 #Piece class
 
 class PieceClass:
-    def __init__(self, char, rowX, colY):
+    def __init__(self, char, rowX, colY, num_colY):
         self.char = char
         self.rowX = rowX
         self.colY = colY
+        self.act_rowX = chr(ord('@') + (rowX//2))
+        self.act_colY = num_colY
 
 #Board class
 class BoardClass:
@@ -26,17 +28,20 @@ class BoardClass:
     
     def clean_board_file(self):
         stored_pieces = []
-        row_count = 0
         for row in range(len(self.board_data)):
+            num_colY = 0
             for col in range(len(self.board_data[row])):
                 # if a | run data function for gathering points
                 if(self.board_data[row][col:col+3] == '| |'):
-                    
-                    new_piece = PieceClass(self.board_data[row][col+1], row, col+1)
+                    num_colY+=1
+                    new_piece = PieceClass(self.board_data[row][col+1], row, col+1, num_colY)
                     stored_pieces.append(new_piece)
-        print(row_count)
+    
         for i in stored_pieces:
-            print('char: "' + str(i.char) + '" ' + str(i.rowX) + ' ' + str(i.colY))
+            print(str(i.act_rowX) + ' ' + str(i.act_colY))
+
+        '''for i in stored_pieces:
+            print('char: "' + str(i.char) + '" ' + str(i.rowX) + ' ' + str(i.colY))'''
 
 #Ship class
 class ShipClass:
