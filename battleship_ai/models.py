@@ -5,9 +5,9 @@ import random
 #Piece class
 
 class PieceClass:
-    def __init__(self):
-        self.rowX = 0
-        self.colY = 0
+    def __init__(self, rowX, colY):
+        self.rowX = rowX
+        self.colY = colY
 
 #Board class
 class BoardClass:
@@ -24,12 +24,16 @@ class BoardClass:
         f.closed
     
     def clean_board_file(self):
+        stored_pieces = []
         for row in range(len(self.board_data)):
             for col in range(len(self.board_data[row])):
                 # if a | run data function for gathering points
-                if(self.board_data[row][col].find('| |') == True):
-                    #self.piece_validation(self.board_data[row][col], row, col)
-                    print(self.board_data[row][col])
+                if(self.board_data[row][col:col+3] == '| |'):
+                    new_piece = PieceClass(row, col+1)
+                    stored_pieces.append(new_piece)
+        
+        for i in stored_pieces:
+            print(str(i.rowX) + ' ' + str(i.colY))
     
     '''def piece_validation(self, current_cord, row, col):
         if(current_cord[row][col + 1] == ' ' and current_cord[row][col + 2] == '|'):
