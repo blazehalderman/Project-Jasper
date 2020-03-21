@@ -5,7 +5,8 @@ import random
 #Piece class
 
 class PieceClass:
-    def __init__(self, rowX, colY):
+    def __init__(self, char, rowX, colY):
+        self.char = char
         self.rowX = rowX
         self.colY = colY
 
@@ -25,20 +26,17 @@ class BoardClass:
     
     def clean_board_file(self):
         stored_pieces = []
+        row_count = 0
         for row in range(len(self.board_data)):
             for col in range(len(self.board_data[row])):
                 # if a | run data function for gathering points
                 if(self.board_data[row][col:col+3] == '| |'):
-                    new_piece = PieceClass(row, col+1)
+                    
+                    new_piece = PieceClass(self.board_data[row][col+1], row, col+1)
                     stored_pieces.append(new_piece)
-        
+        print(row_count)
         for i in stored_pieces:
-            print(str(i.rowX) + ' ' + str(i.colY))
-    
-    '''def piece_validation(self, current_cord, row, col):
-        if(current_cord[row][col + 1] == ' ' and current_cord[row][col + 2] == '|'):
-            PieceLock = current_cord[row][col + 1]
-            print(PieceLock)'''
+            print('char: "' + str(i.char) + '" ' + str(i.rowX) + ' ' + str(i.colY))
 
 #Ship class
 class ShipClass:
