@@ -3,7 +3,6 @@ import random
 # models for game pieces, players, ships, board(s)
 
 #Piece class
-
 class PieceClass:
     def __init__(self, char, rowX, colY, num_colY):
         self.char = char
@@ -19,6 +18,13 @@ class BoardClass:
         self.board_data = []
         self.board_pieces = []
 
+    #prints current board file
+    def print_board_file(self):
+        with open(self.file) as f:
+            print(f.read() + "\n\n")
+        f.closed
+
+    #reads a file and saves data into 2d array
     def read_board_file(self):
         with open(self.file) as f:
             for line in f:
@@ -26,12 +32,12 @@ class BoardClass:
                     self.board_data.append(i)
         f.closed
     
+    #sorts through file 2d array and identifies valid points
     def clean_board_file(self):
         stored_pieces = []
         for row in range(len(self.board_data)):
             num_colY = 0
             for col in range(len(self.board_data[row])):
-                # if a | run data function for gathering points
                 if(self.board_data[row][col:col+3] == '| |'):
                     num_colY+=1
                     new_piece = PieceClass(self.board_data[row][col+1], row, col+1, num_colY)
@@ -45,8 +51,7 @@ class ShipClass:
     def __init__(self, ship_length, ship_type):
         self.ship_length = ship_length
         self.ship_type = ship_type
-        self.ship_store_cordX = 0
-        self.ship_store_cordY = 0
+        self.ship_cord_store = []
         
 #Player class
 class PlayerClass:
@@ -54,14 +59,24 @@ class PlayerClass:
         self.name = name
         self.board = board
         self.default_ship_list = default_ship_list
-    
+
+    def ship_name_locate(self):
+        temp_storage = input("Please select a ship to place on the board(ship name): ")
+        for i in self.default_ship_list:
+            if(i.ship_type == temp_storage):
+                return (i)
+
+    def ship_cord_place(self, temp_ship):
+        temp_storage = input("Please select placement coordinates for " + temp_ship.ship_type + 
+        ": length - " + str(temp_ship.ship_length) + ":")
+
     # Player methods
 
 # Battleship game class
 class BattleshipGameClass:
     # define players array
-    def __init__(self, player_list):
-        self.player_list = player_list
+    def __init__(self):
+        self.player_list = []
     
     # game actions
     def game_start(self):
@@ -89,11 +104,21 @@ class BattleshipGameClass:
         
         # store all information into active player
         active_player = PlayerClass(player_name, board_file, default_ship_array)
-        
+        self.player_list.append(active_player)
         #list boats size stored and types
         for i in active_player.default_ship_list:
             print(i.ship_length)
             print(i.ship_type)
+
+        return (active_player)
+    
+    #game data management
+    def game_run(self, player):
+        ship_located = player.ship_name_locate()
+        print("\n" + ship_located.ship_type + " Located\n")
+        player.board.print_board_file()
+        player.ship_cord_place(ship_located)
+        print("game is running!")
 
     def game_end(self):
         print("game has ended!")

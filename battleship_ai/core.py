@@ -4,9 +4,8 @@ from .models import(BoardClass, ShipClass, PlayerClass, BattleshipGameClass)
 
 # initialize variables
 
-player_list = []
-
 # gets player name
-current_session = BattleshipGameClass(player_list)
+current_session = BattleshipGameClass()
 
-current_session.game_start()
+player = current_session.game_start()
+current_session.game_run(player)
