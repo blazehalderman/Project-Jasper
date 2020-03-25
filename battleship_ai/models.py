@@ -1,4 +1,4 @@
-import random
+import random, time
 
 # models for game pieces, players, ships, board(s)
 
@@ -55,13 +55,35 @@ class ShipClass:
 
     #takes separated cord rows, cols
     def ship_piece_locate(self, temp_ship, board_pieces):
-        temp_cords = input("Please select placement coordinate range for " + temp_ship.ship_type + 
-        ": length - " + str(temp_ship.ship_length) + ":")
-        #find valid char and input for storing values in temp_cords
-        #for char in temp_cords:
-            #change J to be dynamic for different board sizes
-            #while(char != max(i.act_rowX for i in board_pieces)):
-            #    chr(ord(char))
+        valid_args = False
+        while(valid_args == False):
+            temp = []
+            temp_cords = input("Please select placement coordinate range for " + temp_ship.ship_type + 
+            ": length - " + str(temp_ship.ship_length) + ":")
+            #find valid char and input for storing values in temp_cords
+            for i in temp_cords.strip().split(' '):
+                temp.append(i)
+            count = 0
+            for j in temp:
+                ind = 0
+                for k in j:
+                    if(k.isalpha() and ind == 0):
+                        ind += 1
+                        continue
+                    if(k.isnumeric() and ind <= 2 and ind != 0):
+                        ind += 1
+                        continue
+                    else:
+                        print("ERROR: Please enter coordinates properly!")
+                        break
+                else:
+                    count += 1
+                    continue
+                break
+
+            if(count == len(temp)):
+                valid_args = True
+        
         
 #Player class
 class PlayerClass:
@@ -126,7 +148,6 @@ class BattleshipGameClass:
         board = player.board
         pieces = board.board_pieces
         ship_located.ship_piece_locate(ship_located, pieces)
-        print(max(i.act_rowX for i in pieces))
         print("game is running!")
 
     def game_end(self):
