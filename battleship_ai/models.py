@@ -1,4 +1,4 @@
-import random, time
+import random
 
 # models for game pieces, players, ships, board(s)
 
@@ -53,37 +53,40 @@ class ShipClass:
         self.ship_type = ship_type
         self.ship_cord_store = []
 
-    #takes separated cord rows, cols
-    def ship_piece_locate(self, temp_ship, board_pieces):
-        valid_args = False
-        while(valid_args == False):
+    #validates coordinates based on proper Battleship Cord syntax
+    def ship_piece_validate(self, temp_ship, board_pieces):
+        while(True):
             temp = []
             temp_cords = input("Please select placement coordinate range for " + temp_ship.ship_type + 
             ": length - " + str(temp_ship.ship_length) + ":")
-            #find valid char and input for storing values in temp_cords
-            for i in temp_cords.strip().split(' '):
-                temp.append(i)
-            count = 0
-            for j in temp:
-                ind = 0
-                for k in j:
-                    if(k.isalpha() and ind == 0):
-                        ind += 1
-                        continue
-                    if(k.isnumeric() and ind <= 2 and ind != 0):
-                        ind += 1
-                        continue
+            try: 
+                for i in temp_cords.strip().split(' '):
+                    temp.append(i)
+                if(len(temp) != 2):
+                    raise Exception("ERROR: Invalid entry, Please enter no more/less then a coordinate pair (A2 B2)")
+                count = 0
+                for j in temp:
+                    ind = 0
+                    for k in j:
+                        if(k.isalpha() and ind == 0):
+                            ind += 1
+                            continue
+                        elif(k.isnumeric() and ind <= 2 and ind != 0):
+                            ind += 1
+                            continue
+                        else:
+                            print("ERROR: Invalid entry, Please enter valid cords (height, width) ex. A2 B2")
+                            break
                     else:
-                        print("ERROR: Please enter coordinates properly!")
-                        break
-                else:
-                    count += 1
-                    continue
-                break
-
-            if(count == len(temp)):
-                valid_args = True
-        
+                        count += 1
+                        continue
+                    break
+                if(count == len(temp)):
+                    return temp
+            except ValueError:
+                print("Invalid entry, please enter an alphanumeric character followed by a maximum of 2 digits (heigth, width) ex. A10 B10")
+            except Exception as e:
+                print(e)  
         
 #Player class
 class PlayerClass:
@@ -147,7 +150,7 @@ class BattleshipGameClass:
         player.board.print_board_file()
         board = player.board
         pieces = board.board_pieces
-        ship_located.ship_piece_locate(ship_located, pieces)
+        ship_located.ship_piece_validate(ship_located, pieces)
         print("game is running!")
 
     def game_end(self):
