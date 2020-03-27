@@ -98,13 +98,16 @@ class ShipClass:
 #Player class
 class PlayerClass:
     def __init__(self):
-        self
+        self.name = ''
+        self.board = []
+        self.default_ship_list = []
     
-    #CREATE FUNCTION FOR RUNNING ALL FUNCTIONS
+    #initiates player name
     def player_name_init(self):
         player_name = input("Welcome to Battleship! Please enter your name: ")
         self.name = player_name
 
+    #initiates player board
     def player_board_init(self):
         board = input("Please enter the Battleship map you wish to play(must follow specific formats in board.txt): ")
         board_file = BoardClass(board)
@@ -112,19 +115,18 @@ class PlayerClass:
         board_file.clean_board_file()
         self.board = board_file
 
+    #initiates default ship list
     def player_default_ship_init(self):
-        ship_list = []
         ship_carrier = ShipClass(5, "Aircraft Carrier")
         ship_battle = ShipClass(4, "Battleship")
         ship_destroyer = ShipClass(3, "Destroyer")
         ship_submarine = ShipClass(3, "Submarine")
         ship_patrol = ShipClass(2, "Patrol Boat")
-        ship_list.append(ship_carrier)
-        ship_list.append(ship_battle)
-        ship_list.append(ship_destroyer)
-        ship_list.append(ship_submarine)
-        ship_list.append(ship_patrol)
-        self.default_ship_list = ship_list
+        self.default_ship_list.append(ship_carrier)
+        self.default_ship_list.append(ship_battle)
+        self.default_ship_list.append(ship_destroyer)
+        self.default_ship_list.append(ship_submarine)
+        self.default_ship_list.append(ship_patrol)
 
     #Searches default ship piece
     def default_ship_name_locate(self):
@@ -139,7 +141,7 @@ class BattleshipGameClass:
     def __init__(self):
         self.player_list = []
     
-    def game_setup(self):
+    def player_setup(self):
         active_player = PlayerClass()
         state = False
         while(not state):    
@@ -155,7 +157,7 @@ class BattleshipGameClass:
                 else:
                     self.player_list.append(active_player)
                     print("This is a new user, welcome " + active_player.name + "!")
-                    state = False
+                    state = True
             except NameError:
                 raise Exception("There was an error, please try again")
 
@@ -168,21 +170,29 @@ class BattleshipGameClass:
         
         return(active_player)
 
-    # game actions
-    def game_start(self):
-        # store all information into active player
-        active_player = self.game_setup()
-        return (active_player)
-    
-    #game data management
-    def game_run(self, player):
+    #boat placement
+    def boat_placement(self, player):
         ship_located = player.default_ship_name_locate()
+        print(ship_located)
         print("\n" + ship_located.ship_type + " Located\n")
-        player.board.print_board_file()
         cur_board = player.board
-        pieces = cur_board.board_pieces
+        cur_pieces = cur_board.board_pieces
         ship_cord_validated = ship_located.ship_cord_validate(ship_located)
-        cur_board.board_piece_validate(ship_cord_validated, pieces)
+        cur_board.board_piece_validate(ship_cord_validated, cur_pieces)
+        print("Boat placement code here")
+    
+    #game actions
+    def game_start(self):
+        player = self.player_setup()
+
+        print(player.default_ship_list[0])
+
+        # implement into move functions
+        player.board.print_board_file()
+
+        # ship coordinate validate(move to player class function)
+        self.boat_placement(player)
+        
         print("game is running!")
 
     def game_end(self):
