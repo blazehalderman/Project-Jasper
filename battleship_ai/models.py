@@ -60,7 +60,8 @@ class BoardClass:
     #places a ship on board
     def place_ship_board(self, valid_cord, board):
         #loop through board
-        for i in board.board_pieces:
+        print("HERE")
+        #for i in board.board_pieces:
             #get start position
             #if(i.act_rowX == valid_cord[0][0] and i.act_colY == valid[0][1]):
             
@@ -83,11 +84,25 @@ class ShipClass:
                     temp.append(i)
                 if(len(temp) != 2):
                     raise Exception("ERROR: Invalid entry, Please enter no more/less then a cord pair (A2 B2)")
-                if ((temp[0][0].isalpha() and temp[0][0] <= board.max_row) and (temp[1][0].isalpha() and temp[1][0] <= board.max_row)
-                 and (temp[0][1].isnumeric() and int(temp[0][1]) <= board.max_col) and (temp[1][1].isnumeric() and int(temp[1][1]) <= board.max_col)):
+                if ((temp[0][0].isalpha() and temp[0][0] <= board.max_row) and (temp[1][0].isalpha() and temp[1][0] <= board.max_row) and 
+                (temp[0][1].isnumeric() and int(temp[0][1]) <= board.max_col) and (temp[1][1].isnumeric() and int(temp[1][1]) <= board.max_col)):
                     #if temp[0][0] is in the same col as temp[1][0] and +length, -length(up or down max)
-                        #temp[0][1] is in the same row as temp[1][1] and +length, -length(left or right max)
-                    return(temp)
+                    if(temp[0][0] != temp[1][0]):
+                        dist = abs(ord(temp[0][0]) - ord(temp[1][0])) + 1
+                        if(dist == self.ship_length):
+                            print("ship fits")
+                            return(temp)
+                        else:
+                            raise Exception("ERROR: Invalid entry, (" + temp[0][0] + ", " + temp[0][1] + "), " + 
+                            "(" + temp[1][0] + ", " + temp[1][1] + ") row does not match")
+                    else:
+                        dist = abs(int(temp[0][1]) - int(temp[1][1])) + 1
+                        if(dist == self.ship_length):
+                            print("ship fits")
+                            return(temp)
+                        else:
+                            raise Exception("ERROR: Invalid entry, (" + temp[0][0] + ", " + temp[0][1] + "), " + 
+                            "(" + temp[1][0] + ", " + temp[1][1] + "), col does not match")
                 else:
                     raise Exception("ERROR: Invalid entry, Please enter valid cords (height, width) ex. A2 B2")
             except ValueError:
@@ -140,10 +155,8 @@ class PlayerClass:
         ship_located = self.default_ship_name_locate()
         print(ship_located)
         print("\n" + ship_located.ship_type + " Located\n")
-        cur_board = self.board
-        cur_pieces = cur_board.board_pieces
         ship_cord_validated = ship_located.ship_cord_validate(ship_located, self.board)
-        cur_board.place_ship_board(ship_cord_validated, self.board)
+        self.board.place_ship_board(ship_cord_validated, self.board)
         print("Boat placement code here")
 
 # Battleship game class
