@@ -10,12 +10,6 @@ class PieceClass:
         self.colY = colY
         self.act_rowX = chr(ord('@') + (rowX//2))
         self.act_colY = num_colY
-        self.MAX_ROW = 'J'
-        self.MAX_COL = 10
-        if (self.act_rowX > self.MAX_ROW):
-            self.MAX_ROW = self.act_rowX
-        if (self.act_colY > self.MAX_COL):
-            self.MAX_COL = self.act_colY
     #CREATE FUNCTION FOR RUNNING ALL FUNCTIONS
 
 #Board class
@@ -24,7 +18,8 @@ class BoardClass:
         self.file = file
         self.board_data = []
         self.board_pieces = []
-        self.board_max = []
+        self.max_col = 10
+        self.max_row = 'J'
 
     #CREATE FUNCTION FOR RUNNING ALL FUNCTIONS
 
@@ -44,31 +39,31 @@ class BoardClass:
     
     #sorts through file 2d array and identifies valid points
     def clean_board_file(self):
+        num_rowX = 1
         for row in range(len(self.board_data)):
             num_colY = 0
             for col in range(len(self.board_data[row])):
                 if(self.board_data[row][col:col+3] == '| |'):
                     num_colY+=1
+                    if (num_colY > self.max_col):
+                        self.max_col = num_colY
                     new_piece = PieceClass(self.board_data[row][col+1], row, col+1, num_colY)
                     self.board_pieces.append(new_piece)
-    
+            num_rowX+=1
+            if(num_rowX > ord(self.max_row)):
+                self.max_row = chr(ord('@') + (num_rowX//2))
+        
+        #print cords of board
         for i in self.board_pieces:
             print(str(i.act_rowX) + ' ' + str(i.act_colY))
     
-    def board_piece_validate(self, valid_cord, board_pieces):
-        valid = 0
-        while(valid != 2):
-            for i in board_pieces:
-                #find first cord in board
-                if (valid_cord[0][0] == i.act_rowX and valid_cord[0][1] == i.act_rowY):
-                    valid += 1
-                    start = i
-                    print(i.act_rowX)
-                    print(i.act_colY)
-                    break
-                
-            for piece in board_pieces
-
+    #places a ship on board
+    def place_ship_board(self, valid_cord, board):
+        #loop through board
+        for i in board.board_pieces:
+            #get start position
+            #if(i.act_rowX == valid_cord[0][0] and i.act_colY == valid[0][1]):
+            
 
 #Ship class
 class ShipClass:
@@ -77,10 +72,8 @@ class ShipClass:
         self.ship_type = ship_type
         self.ship_cord_store = []
 
-    #CREATE FUNCTION FOR RUNNING ALL FUNCTIONS
-
     #validates coordinates based on proper Battleship Cord syntax
-    def ship_cord_validate(self, temp_ship):
+    def ship_cord_validate(self, temp_ship, board):
         while(True):
             temp = []
             temp_cords = input("Please select placement coordinate range for " + temp_ship.ship_type + 
@@ -90,21 +83,13 @@ class ShipClass:
                     temp.append(i)
                 if(len(temp) != 2):
                     raise Exception("ERROR: Invalid entry, Please enter no more/less then a cord pair (A2 B2)")
-                count = 0
-                for j in temp:
-                    ind = 0
-                    for k in j:
-                        if(k.isalpha() and k <= ind == 0):
-                            ind += 1
-                            continue
-                        elif(k.isnumeric() and ind <= 2 and ind != 0):
-                            ind += 1
-                            continue
-                        else:
-                            raise Exception("ERROR: Invalid entry, Please enter valid cords (height, width) ex. A2 B2")
-                    count += 1
-                if(count == len(temp)):
-                    return temp
+                if ((temp[0][0].isalpha() and temp[0][0] <= board.max_row) and (temp[1][0].isalpha() and temp[1][0] <= board.max_row)
+                 and (temp[0][1].isnumeric() and int(temp[0][1]) <= board.max_col) and (temp[1][1].isnumeric() and int(temp[1][1]) <= board.max_col)):
+                    #if temp[0][0] is in the same col as temp[1][0] and +length, -length(up or down max)
+                        #temp[0][1] is in the same row as temp[1][1] and +length, -length(left or right max)
+                    return(temp)
+                else:
+                    raise Exception("ERROR: Invalid entry, Please enter valid cords (height, width) ex. A2 B2")
             except ValueError:
                 raise Exception("Invalid entry, please enter an alphanumeric character followed by a maximum of 2 digits (heigth, width) ex. A10 B10")
             except Exception as e:
@@ -157,8 +142,8 @@ class PlayerClass:
         print("\n" + ship_located.ship_type + " Located\n")
         cur_board = self.board
         cur_pieces = cur_board.board_pieces
-        ship_cord_validated = ship_located.ship_cord_validate(ship_located)
-        cur_board.board_piece_validate(ship_cord_validated, cur_pieces)
+        ship_cord_validated = ship_located.ship_cord_validate(ship_located, self.board)
+        cur_board.place_ship_board(ship_cord_validated, self.board)
         print("Boat placement code here")
 
 # Battleship game class
@@ -215,5 +200,5 @@ class BattleshipGameClass:
         print("turn has ended")
 
     def game_set_winner(self):
-        print("winner is " + self.active_player.name)
+        print("winner is ")
         return
