@@ -81,9 +81,9 @@ class ShipClass:
             ": length - " + str(temp_ship.ship_length) + ":")
             try: 
                 for i in temp_cords.strip().split(' '):
-                    temp.append(i)
+                        temp.append(i)              
                 if(len(temp) != 2):
-                    raise Exception("ERROR: Invalid entry, Please enter no more/less then a cord pair (A2 B2)")
+                    raise Exception("ERROR: Invalid entry, Please enter no more/less then a cord pair (A2 B2)") 
                 if ((temp[0][0].isalpha() and temp[0][0] <= board.max_row) and (temp[1][0].isalpha() and temp[1][0] <= board.max_row) and 
                 (temp[0][1].isnumeric() and int(temp[0][1]) <= board.max_col) and (temp[1][1].isnumeric() and int(temp[1][1]) <= board.max_col)):
                     #if temp[0][0] is in the same col as temp[1][0] and +length, -length(up or down max)
@@ -93,16 +93,21 @@ class ShipClass:
                             print("ship fits")
                             return(temp)
                         else:
-                            raise Exception("ERROR: Invalid entry, (" + temp[0][0] + ", " + temp[0][1] + "), " + 
-                            "(" + temp[1][0] + ", " + temp[1][1] + ") row does not match")
+                            raise Exception("ERROR: Invalid entry, (" + temp[0][0] + ", " + temp[0][1: len(temp[1])] + "), " + 
+                            "(" + temp[1][0] + ", " + temp[1][1: len(temp[1])] + ") row does not match")
                     else:
-                        dist = abs(int(temp[0][1]) - int(temp[1][1])) + 1
+                        if(int(temp[0][1: len(temp[0])]) >= 10 or int(temp[1][1 : len(temp[1])]) >= 10):
+                            print("HERE1")
+                            dist = abs(int(temp[0][1: len(temp[0])]) - int(temp[1][1 : len(temp[1])])) + 1
+                        else:
+                            dist = abs(int(temp[0][1]) - int(temp[1][1])) + 1
+                        print(dist)
                         if(dist == self.ship_length):
                             print("ship fits")
                             return(temp)
                         else:
-                            raise Exception("ERROR: Invalid entry, (" + temp[0][0] + ", " + temp[0][1] + "), " + 
-                            "(" + temp[1][0] + ", " + temp[1][1] + "), col does not match")
+                            raise Exception("ERROR: Invalid entry, (" + temp[0][0] + ", " + temp[0][1: len(temp[0])] + "), " + 
+                            "(" + temp[1][0] + ", " + temp[1][1: len(temp[1])] + "), col does not match")
                 else:
                     raise Exception("ERROR: Invalid entry, Please enter valid cords (height, width) ex. A2 B2")
             except ValueError:
