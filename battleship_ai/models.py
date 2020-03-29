@@ -146,7 +146,7 @@ class PlayerClass:
     #initiates default ship list
     def player_default_ship_init(self):
         ship_list = []
-        ship_carrier = ShipClass(5, "Aircraft Carrier", "C")
+        ship_carrier = ShipClass(5, "Aircraft Carrier", "A")
         ship_battle = ShipClass(4, "Battleship", "B")
         ship_destroyer = ShipClass(3, "Destroyer", "D")
         ship_submarine = ShipClass(3, "Submarine", "S")
@@ -160,20 +160,22 @@ class PlayerClass:
 
     #Searches default ship piece
     def default_ship_name_locate(self):
-        try:
-            temp_storage = input("Please select a ship to place on the board(ship name): ")
-            for i in self.default_ship_list:
-                if(i.ship_char == temp_storage.upper()):
-                    return (i)
-        except NameError:
-            raise Exception("Invalid entry, please review ships and try again")
+        state = False
+        while(not state):
+            temp_storage = input("Boat Placement\nSelect a boat to place (Ref): ")
+            try:
+                for i in self.default_ship_list:
+                    if(i.ship_char == temp_storage):
+                        print("\n" + i.ship_type + " type located\n")
+                        i.ship_cord_validate(i, self.board)
+                        state = True
+                        break
+            except NameError:
+                raise Exception("Invalid entry, please review ships and try again")
 
         #boat placement
     def boat_placement(self):
-        ship_located = self.default_ship_name_locate()
-        print(ship_located)
-        print("\n" + ship_located.ship_type + "type located\n")
-        ship_located.ship_cord_validate(ship_located, self.board)
+        self.default_ship_name_locate()
 
 # Battleship game class
 class BattleshipGameClass:
@@ -224,7 +226,8 @@ class BattleshipGameClass:
 
         # implement into move functions
         player.board.print_board_file()
-        print("\tAircraft Carrier\tBattleship\tDestroyer\tSubmarine\tPatrol Boat\n" + 
+        print("\tAircraft Carrier\tBattleship\tDestroyer\tSubmarine\tPatrol Boat\n" +
+        "ref:\t       A\t\t    B\t\t    D\t\t    S\t\t     P\n" +
         "size:\t       5\t\t    4\t\t    4\t\t    3\t\t     2\n" + 
         "piece:\t     <000>\t\t  <00>\t\t  <00>\t\t   <0>\t\t    <>\n")
         # ship coordinate validate(move to player class function)
