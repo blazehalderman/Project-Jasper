@@ -54,60 +54,59 @@ class BoardClass:
                 self.max_row = chr(ord('@') + (num_rowX//2))
         
         #print cords of board
-        for i in self.board_pieces:
-            print(str(i.act_rowX) + ' ' + str(i.act_colY))
+        #for i in self.board_pieces:
+            #print(str(i.act_rowX) + ' ' + str(i.act_colY))
     
-    #places a ship on board
-    def place_ship_board(self, valid_cord, board):
+    #completes validation of coords and places ship on board
+    def place_ship_board(self, valid_cord, temp_ship, board):
         #loop through board
-        print("HERE")
-        #for i in board.board_pieces:
-            #get start position
-            #if(i.act_rowX == valid_cord[0][0] and i.act_colY == valid[0][1]):
+        if(valid_cord[0][0] != valid_cord[1][0]):
+            dist = abs(ord(valid_cord[0][0]) - ord(valid_cord[1][0])) + 1
+            if(dist == self.ship_length):
+                print("ship fits")
+                return(False)
+            else:
+                raise Exception("ERROR: Invalid entry, (" + valid_cord[0][0] + ", " + valid_cord[0][1: len(valid_cord[1])] + "), " + 
+                "(" + valid_cord[1][0] + ", " + valid_cord[1][1: len(valid_cord[1])] + ") row does not match")
+        else:
+            if(int(valid_cord[0][1: len(valid_cord[0])]) >= 10 or int(valid_cord[1][1 : len(valid_cord[1])]) >= 10):
+                dist = abs(int(valid_cord[0][1: len(valid_cord[0])]) - int(valid_cord[1][1 : len(valid_cord[1])])) + 1
+            else:
+                dist = abs(int(valid_cord[0][1]) - int(valid_cord[1][1])) + 1
+                print(dist)
+            if(dist == temp_ship.ship_length):
+                print("ship fits")
+                return(False)
+            else:
+                raise Exception("ERROR: Invalid entry, does not meet boat size. ("+ valid_cord[0][0: len(valid_cord[0])] + ")" + 
+                "(" + valid_cord[1][0: len(valid_cord[1])] + ") distance is " + str(dist))
             
 
 #Ship class
 class ShipClass:
-    def __init__(self, ship_length, ship_type):
+    def __init__(self, ship_length, ship_type, ship_char):
         self.ship_length = ship_length
         self.ship_type = ship_type
+        self.ship_char = ship_char
         self.ship_cord_store = []
 
-    #validates coordinates based on proper Battleship Cord syntax
+    #validates syntax of coordinates
     def ship_cord_validate(self, temp_ship, board):
-        while(True):
-            temp = []
+        d = True
+        while(d):
+            valid_cord = []
             temp_cords = input("Please select placement coordinate range for " + temp_ship.ship_type + 
             ": length - " + str(temp_ship.ship_length) + ":")
             try: 
                 for i in temp_cords.strip().split(' '):
-                        temp.append(i)              
-                if(len(temp) != 2):
+                        valid_cord.append(i)              
+                if(len(valid_cord) != 2):
                     raise Exception("ERROR: Invalid entry, Please enter no more/less then a cord pair (A2 B2)") 
-                if ((temp[0][0].isalpha() and temp[0][0] <= board.max_row) and (temp[1][0].isalpha() and temp[1][0] <= board.max_row) and 
-                (temp[0][1].isnumeric() and int(temp[0][1]) <= board.max_col) and (temp[1][1].isnumeric() and int(temp[1][1]) <= board.max_col)):
-                    #if temp[0][0] is in the same col as temp[1][0] and +length, -length(up or down max)
-                    if(temp[0][0] != temp[1][0]):
-                        dist = abs(ord(temp[0][0]) - ord(temp[1][0])) + 1
-                        if(dist == self.ship_length):
-                            print("ship fits")
-                            return(temp)
-                        else:
-                            raise Exception("ERROR: Invalid entry, (" + temp[0][0] + ", " + temp[0][1: len(temp[1])] + "), " + 
-                            "(" + temp[1][0] + ", " + temp[1][1: len(temp[1])] + ") row does not match")
-                    else:
-                        if(int(temp[0][1: len(temp[0])]) >= 10 or int(temp[1][1 : len(temp[1])]) >= 10):
-                            print("HERE1")
-                            dist = abs(int(temp[0][1: len(temp[0])]) - int(temp[1][1 : len(temp[1])])) + 1
-                        else:
-                            dist = abs(int(temp[0][1]) - int(temp[1][1])) + 1
-                        print(dist)
-                        if(dist == self.ship_length):
-                            print("ship fits")
-                            return(temp)
-                        else:
-                            raise Exception("ERROR: Invalid entry, (" + temp[0][0] + ", " + temp[0][1: len(temp[0])] + "), " + 
-                            "(" + temp[1][0] + ", " + temp[1][1: len(temp[1])] + "), col does not match")
+                if ((valid_cord[0][0].isalpha() and valid_cord[0][0] <= board.max_row) and (valid_cord[1][0].isalpha() and valid_cord[1][0] <= board.max_row) and 
+                (valid_cord[0][1].isnumeric() and int(valid_cord[0][1]) <= board.max_col) and (valid_cord[1][1].isnumeric() and int(valid_cord[1][1]) <= board.max_col)):
+                    #if valid_cord[0][0] is in the same col as valid_cord[1][0] and +length, -length(up or down max)
+                    #return true or false
+                    d = board.place_ship_board(valid_cord, temp_ship, board)
                 else:
                     raise Exception("ERROR: Invalid entry, Please enter valid cords (height, width) ex. A2 B2")
             except ValueError:
@@ -122,25 +121,36 @@ class PlayerClass:
     
     #initiates player name
     def player_name_init(self):
-        player_name = input("Welcome to Battleship! Please enter your name: ")
+        player_name = input("\nWelcome to Battleship! Please enter your name: ")
         self.name = player_name
 
     #initiates player board
     def player_board_init(self):
-        board = input("Please enter the Battleship map you wish to play(must follow specific formats in board.txt): ")
-        board_file = BoardClass(board)
-        board_file.read_board_file()
-        board_file.clean_board_file()
-        self.board = board_file
+        board_type = input("\nPlease enter the type of Battleship map\n\n\t1: Default\t2:Custom\n\nType: ")
+        if(board_type == '1'):
+            board_file = BoardClass("board.txt")
+            board_file.read_board_file()
+            board_file.clean_board_file()
+            self.board = board_file
+        elif(board_type == '2'):
+            board = input("Please enter custom map file(in this directory): ")
+            board_file = BoardClass(board)
+            board_file.read_board_file()
+            board_file.clean_board_file()
+            self.board = board_file
+        else:
+            raise Exception("Please enter only 1 or 2 as your answer!")
+        print("\n")
+
 
     #initiates default ship list
     def player_default_ship_init(self):
         ship_list = []
-        ship_carrier = ShipClass(5, "Aircraft Carrier")
-        ship_battle = ShipClass(4, "Battleship")
-        ship_destroyer = ShipClass(3, "Destroyer")
-        ship_submarine = ShipClass(3, "Submarine")
-        ship_patrol = ShipClass(2, "Patrol Boat")
+        ship_carrier = ShipClass(5, "Aircraft Carrier", "C")
+        ship_battle = ShipClass(4, "Battleship", "B")
+        ship_destroyer = ShipClass(3, "Destroyer", "D")
+        ship_submarine = ShipClass(3, "Submarine", "S")
+        ship_patrol = ShipClass(2, "Patrol Boat", "P")
         ship_list.append(ship_carrier)
         ship_list.append(ship_battle)
         ship_list.append(ship_destroyer)
@@ -150,19 +160,20 @@ class PlayerClass:
 
     #Searches default ship piece
     def default_ship_name_locate(self):
-        temp_storage = input("Please select a ship to place on the board(ship name): ")
-        for i in self.default_ship_list:
-            if(i.ship_type == temp_storage):
-                return (i)
+        try:
+            temp_storage = input("Please select a ship to place on the board(ship name): ")
+            for i in self.default_ship_list:
+                if(i.ship_char == temp_storage.upper()):
+                    return (i)
+        except NameError:
+            raise Exception("Invalid entry, please review ships and try again")
 
         #boat placement
     def boat_placement(self):
         ship_located = self.default_ship_name_locate()
         print(ship_located)
-        print("\n" + ship_located.ship_type + " Located\n")
-        ship_cord_validated = ship_located.ship_cord_validate(ship_located, self.board)
-        self.board.place_ship_board(ship_cord_validated, self.board)
-        print("Boat placement code here")
+        print("\n" + ship_located.ship_type + "type located\n")
+        ship_located.ship_cord_validate(ship_located, self.board)
 
 # Battleship game class
 class BattleshipGameClass:
@@ -179,33 +190,43 @@ class BattleshipGameClass:
                 if(len(self.player_list) > 0):
                     for player in self.player_list:
                         if (player.name == active_player.name):
-                            print("Player found! Welcome back, " + player.name)
+                            print("\nPlayer found! Welcome back, " + player.name)
                             active_player = player
                             state = True
                             break
                 else:
                     self.player_list.append(active_player)
-                    print("This is a new user, welcome " + active_player.name + "!")
+                    print("\nThis is a new user, welcome " + active_player.name + "!")
                     state = True
             except NameError:
-                raise Exception("There was an error, please try again")
+                raise Exception("\nThere was an error, please try again")
 
         active_player.player_board_init()
         active_player.player_default_ship_init()
         #list boats size stored and types
-        for i in active_player.default_ship_list:
-            print(i.ship_length)
-            print(i.ship_type)
+        #for i in active_player.default_ship_list:
+            #print(i.ship_length)
+            #print(i.ship_type)
         
         return(active_player)
     
     #game actions
     def game_start(self):
+        print(" _           _   _   _           _     _       \n" +
+        "| |         | | | | | |         | |   (_)      \n" +
+        "| |__   __ _| |_| |_| | ___  ___| |__  _ _ __  \n" +
+        "|  _ \ / _  | __| __| |/ _ \/ __|  _ \| |  _ \ \n" +
+        "| |_) | (_| | |_| |_| |  __/\__ \ | | | | |_) |\n" +
+        "|_.__/ \__,_|\__|\__|_|\___||___/_| |_|_|  __/ \n" +
+        "                                        | |    \n" +
+        "                                        |_|   ")
         player = self.player_setup()
 
         # implement into move functions
         player.board.print_board_file()
-
+        print("\tAircraft Carrier\tBattleship\tDestroyer\tSubmarine\tPatrol Boat\n" + 
+        "size:\t       5\t\t    4\t\t    4\t\t    3\t\t     2\n" + 
+        "piece:\t     <000>\t\t  <00>\t\t  <00>\t\t   <0>\t\t    <>\n")
         # ship coordinate validate(move to player class function)
         player.boat_placement()
         
