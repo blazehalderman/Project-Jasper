@@ -102,7 +102,6 @@ class BoardClass:
 
     def place_ship_validate_y(self, temp_ship, board, dist, head, x):
         if(board.game_board[x][head - 1] == -1):
-            #bug P boat places once when going over another boat
             for d in range(dist):
                 if(board.game_board[x][head - 1] == -1):
                     head += 2
