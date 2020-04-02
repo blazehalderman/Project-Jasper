@@ -1,2 +1,2 @@
 # Project-Jasper
-Battleship game AI using Python
+Battleship game with TensorFlow AI using Python
