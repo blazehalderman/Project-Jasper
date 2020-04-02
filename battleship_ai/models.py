@@ -90,7 +90,6 @@ class BoardClass:
             #print(str(i.rowX) + ' ' + str(i.colY))
     
     def place_ship_validate_x(self, temp_ship, board, dist, head, y):
-        print(str(head) + ' ' + str(dist) + ' ' + str(y))
         if(board.game_board[head][y - 1] == -1):
             for x in range(dist):
                 if(board.game_board[head][y - 1] == -1):
@@ -102,9 +101,7 @@ class BoardClass:
             return (False)
 
     def place_ship_validate_y(self, temp_ship, board, dist, head, x):
-        print(str(head) + ' ' + str(dist) + ' ' + str(x))
         if(board.game_board[x][head - 1] == -1):
-            #bug P boat places once when going over another boat
             for d in range(dist):
                 if(board.game_board[x][head - 1] == -1):
                     head += 2
