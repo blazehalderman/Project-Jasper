@@ -193,6 +193,7 @@ class ShipClass:
     def ship_cord_validate(self, temp_ship, board):
         d = True
         while(d):
+            # if player type is player
             valid_cord = []
             temp_cords = input("\nPlease select coordinate range for - \n\n" + temp_ship.ship_type + 
             "\nsize: " + str(temp_ship.ship_length) + "\n\ncoordinates:")
@@ -213,6 +214,7 @@ class ShipClass:
                 raise Exception("Invalid entry, please enter an alphanumeric character followed by a maximum of 2 digits (heigth, width) ex. A10 B10")
             except Exception as e:
                 print(e)  
+            # if player type is AI - same code as above(randomly generated cords)
         
 #Player class
 class PlayerClass:
@@ -356,6 +358,10 @@ class BattleshipGameClass:
             #print(i.ship_type)
         
         return(active_player)
+
+    # sets player vs (player or AI)
+    # def game_type_set(self)
+        
     
     #game actions
     def game_start(self):
@@ -367,12 +373,13 @@ class BattleshipGameClass:
         "|_.__/ \__,_|\__|\__|_|\___||___/_| |_|_|  __/ \n" +
         "                                        | |    \n" +
         "                                        |_|   ")
+        # player creation
         player = self.player_setup()
 
-        # implement into move functions
+        #create computer/AI(basic ai for now) or another player
         player.board.print_board_file()
         player.print_default_ship_list()
-        # ship coordinate validate(move to player class function)
+        # player ship placement
         player.boat_placement()
         
         print("game is running!")
