@@ -204,7 +204,7 @@ class ShipClass:
                     raise Exception("ERROR: Invalid entry, Please enter no more/less then a cord pair (A2 B2)")
 
                 if ((valid_cord[0][0].isalpha() and valid_cord[0][0] <= board.max_row) and (valid_cord[1][0].isalpha() and valid_cord[1][0] <= board.max_row) and 
-                (valid_cord[1][1: len(valid_cord[1])].isnumeric() and int(valid_cord[1][1: len(valid_cord[1])]) <= board.max_col) and (valid_cord[1][1: len(valid_cord[1])].isnumeric() and int(valid_cord[1][1: len(valid_cord[1])]) <= board.max_col)):
+                (valid_cord[0][1: len(valid_cord[1])].isnumeric() and int(valid_cord[0][1: len(valid_cord[1])]) <= board.max_col) and (valid_cord[1][1: len(valid_cord[1])].isnumeric() and int(valid_cord[1][1: len(valid_cord[1])]) <= board.max_col)):
                     #if valid_cord[0][0] is in the same col as valid_cord[1][0] and +length, -length(up or down max)
                     #return true or false
                     d = board.place_ship_board(valid_cord, temp_ship, board)
@@ -322,7 +322,7 @@ class PlayerClass:
         # place all 5 default boats
         while(len(self.board.boats_placed) < 5):
             self.default_ship_name_locate()
-        return
+        print("All boats have been placed!")
 
 # Battleship game class
 class BattleshipGameClass:
@@ -381,14 +381,32 @@ class BattleshipGameClass:
         player.print_default_ship_list()
         # player ship placement
         player.boat_placement()
+        self.game_turn_start()
         
         print("game is running!")
 
     def game_end(self):
         print("game has ended!")
 
-    def game_end_turn(self):
-        print("turn has ended")
+    def game_turn_start(self):
+        #while ships are on board
+        ships_exist = True
+        while(ships_exist):
+            #get user coord guess for attack action
+            try:
+                valid_cord = input("\n\nPlease enter an attack coordinate\n\n coordinate: ")
+                valid_cord.strip().split()
+                if(len(valid_cord) != 1):
+                    raise Exception("\nERROR: Please enter only a single coordinate")
+                #validate user coord
+                if ((valid_cord[0][0].isalpha() and valid_cord[0][0] <= board.max_row) and 
+                    (valid_cord[0][1: len(valid_cord[1])].isnumeric() and int(valid_cord[0][1: len(valid_cord[1])]) <= board.max_col)):
+                        continue
+                ships_exist = False
+            #check if spot has been guessed already, if not place hit or miss value
+            # if boat is sunk, destroy boat and make a ship sunk, set value of sunk ships + 1, display sunk boat 
+            except NameError:
+                raise Exception("\nThere was an error, please try again")
 
     def game_set_winner(self):
         print("winner is ")
