@@ -356,8 +356,7 @@ class BattleshipGameClass:
         #for i in active_player.default_ship_list:
             #print(i.ship_length)
             #print(i.ship_type)
-        
-        return(active_player)
+        self.active_player = active_player
 
     # sets player vs (player or AI)
     # def game_type_set(self)
@@ -374,13 +373,13 @@ class BattleshipGameClass:
         "                                        | |    \n" +
         "                                        |_|   ")
         # player creation
-        player = self.player_setup()
+        self.player_setup()
 
         #create computer/AI(basic ai for now) or another player
-        player.board.print_board_file()
-        player.print_default_ship_list()
+        self.active_player.board.print_board_file()
+        self.active_player.print_default_ship_list()
         # player ship placement
-        player.boat_placement()
+        ''' self.active_player.boat_placement() '''
         self.game_turn_start()
         
         print("game is running!")
@@ -393,20 +392,26 @@ class BattleshipGameClass:
         ships_exist = True
         while(ships_exist):
             #get user coord guess for attack action
+            valid_cord = []
+            str_split = input("\n\nPlease enter an attack coordinate\n\n coordinate: ")
             try:
-                valid_cord = input("\n\nPlease enter an attack coordinate\n\n coordinate: ")
-                valid_cord.strip().split()
+                for i in str_split.strip().split(' '):
+                    valid_cord.append(i)
+                print(valid_cord)
+                print(len(valid_cord))
                 if(len(valid_cord) != 1):
                     raise Exception("\nERROR: Please enter only a single coordinate")
                 #validate user coord
-                if ((valid_cord[0][0].isalpha() and valid_cord[0][0] <= board.max_row) and 
-                    (valid_cord[0][1: len(valid_cord[1])].isnumeric() and int(valid_cord[0][1: len(valid_cord[1])]) <= board.max_col)):
+                if ((valid_cord[0][0].isalpha() and valid_cord[0][0] <= self.active_player.board.max_row) and 
+                    (valid_cord[0][1: len(valid_cord[1])].isnumeric() and int(valid_cord[0][1: len(valid_cord[1])]) <= self.active_player.board.max_col)):
                         continue
                 ships_exist = False
             #check if spot has been guessed already, if not place hit or miss value
             # if boat is sunk, destroy boat and make a ship sunk, set value of sunk ships + 1, display sunk boat 
-            except NameError:
+            except ValueError:
                 raise Exception("\nThere was an error, please try again")
+            except Exception as e:
+                print(e) 
 
     def game_set_winner(self):
         print("winner is ")
