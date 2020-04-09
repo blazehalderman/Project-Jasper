@@ -18,13 +18,16 @@ class BoardClass:
         self.file = file
         self.board_data = []
         self.raw_board_data = []
+        self.raw_attack_board_data = []
         self.game_board = []
+        self.game_attack_board = []
         self.board_pieces = []
         self.boats_placed = []
         self.max_col = 10
         self.max_row = 'J'
 
     #CREATE FUNCTION FOR RUNNING ALL FUNCTIONS
+
     def create_game_board(self):
         while("" in self.raw_board_data):
             self.raw_board_data.remove("")
@@ -37,18 +40,27 @@ class BoardClass:
                     board_row.append(self.raw_board_data[i][j])
             self.game_board.append(board_row)
 
+    def create_game_attack_board(self):
+        while("" in self.raw_board_data):
+            self.raw_board_data.remove("")
+        for i in range(len(self.raw_board_data)):
+            board_row = []
+            for j in range(len(self.raw_board_data[i])):
+                if(self.raw_board_data[i][j] == ' ' and i >= 2 and i <= 21 and j >= 4):
+                    board_row.append(-1)
+                else:
+                    board_row.append(self.raw_board_data[i][j])
+            self.game_attack_board.append(board_row)
+
     #prints game board
-    def print_board_data(self):
-        count = 0
-        for i in range(len(self.game_board)):
-            for j in range(len(self.game_board[i])):
-                if(self.game_board[i][j] == -1):
+    def print_board_data(self, board):
+        for i in range(len(board)):
+            for j in range(len(board[i])):
+                if(board[i][j] == -1):
                     print(' ', end="")
                 else:
-                    print(self.game_board[i][j], end="")
+                    print(board[i][j], end="")
             print()
-            count += 1
-        print(count)
         print('\n')
 
     #print game board file
@@ -137,9 +149,9 @@ class BoardClass:
                             #print("After " + board.board_pieces[y].char)
                         else:
                             break
-                    self.print_board_data()
+                    self.print_board_data(self.game_board)
                 else:
-                    self.print_board_data()
+                    self.print_board_data(self.game_board)
                     raise Exception("Coordinates overlap an existing ship")
                 return(False)
             else:
@@ -171,9 +183,9 @@ class BoardClass:
                             #print("After " + board.board_pieces[y].char)
                         else:
                             break
-                    self.print_board_data()
+                    self.print_board_data(self.game_board)
                 else:
-                    self.print_board_data()
+                    self.print_board_data(self.game_board)
                     raise Exception("Coordinates overlap an existing ship")
                 return(False)
             else:
@@ -204,7 +216,7 @@ class ShipClass:
                     raise Exception("ERROR: Invalid entry, Please enter no more/less then a cord pair (A2 B2)")
 
                 if ((valid_cord[0][0].isalpha() and valid_cord[0][0] <= board.max_row) and (valid_cord[1][0].isalpha() and valid_cord[1][0] <= board.max_row) and 
-                (valid_cord[0][1: len(valid_cord[1])].isnumeric() and int(valid_cord[0][1: len(valid_cord[1])]) <= board.max_col) and (valid_cord[1][1: len(valid_cord[1])].isnumeric() and int(valid_cord[1][1: len(valid_cord[1])]) <= board.max_col)):
+                (valid_cord[0][1: len(valid_cord[0])].isnumeric() and int(valid_cord[0][1: len(valid_cord[0])]) <= board.max_col) and (valid_cord[1][1: len(valid_cord[1])].isnumeric() and int(valid_cord[1][1: len(valid_cord[1])]) <= board.max_col)):
                     #if valid_cord[0][0] is in the same col as valid_cord[1][0] and +length, -length(up or down max)
                     #return true or false
                     d = board.place_ship_board(valid_cord, temp_ship, board)
@@ -234,6 +246,7 @@ class PlayerClass:
             board_file.read_board_file()
             board_file.clean_board_file()
             board_file.create_game_board()
+            board_file.create_game_attack_board()
             self.board = board_file
         elif(board_type == '2'):
             board = input("Please enter custom map file(in this directory): ")
@@ -241,6 +254,7 @@ class PlayerClass:
             board_file.read_board_file()
             board_file.clean_board_file()
             board_file.create_game_board()
+            board_file.create_game_attack_board()
             self.board = board_file
         else:
             raise Exception("Please enter only 1 or 2 as your answer!")
@@ -379,7 +393,7 @@ class BattleshipGameClass:
         self.active_player.board.print_board_file()
         self.active_player.print_default_ship_list()
         # player ship placement
-        ''' self.active_player.boat_placement() '''
+        self.active_player.boat_placement()
         self.game_turn_start()
         
         print("game is running!")
@@ -397,16 +411,27 @@ class BattleshipGameClass:
             try:
                 for i in str_split.strip().split(' '):
                     valid_cord.append(i)
-                print(valid_cord)
-                print(len(valid_cord))
                 if(len(valid_cord) != 1):
                     raise Exception("\nERROR: Please enter only a single coordinate")
+                for i in range(len(valid_cord)):
+                    for j in range(len(valid_cord[i])):
+                        print(valid_cord[i][j])
                 #validate user coord
                 if ((valid_cord[0][0].isalpha() and valid_cord[0][0] <= self.active_player.board.max_row) and 
-                    (valid_cord[0][1: len(valid_cord[1])].isnumeric() and int(valid_cord[0][1: len(valid_cord[1])]) <= self.active_player.board.max_col)):
-                        continue
-                ships_exist = False
-            #check if spot has been guessed already, if not place hit or miss value
+                    (valid_cord[0][1: len(valid_cord[0])].isnumeric() and int(valid_cord[0][1: len(valid_cord[0])]) <= self.active_player.board.max_col)):
+                        # check if spot has been guessed already, if the current point is a boat, check if is hit or miss
+                        game_board = self.active_player.board.game_board
+                        game_attack_board = self.active_player.board.game_attack_board
+                        y = int(abs((ord(valid_cord[0][0]) - ord('@')) * 2) + 3)
+                        x = int(valid_cord[0][1: len(valid_cord[0])]) * 2
+                        if(game_board[x][y - 1] != -1):
+                            print("It's a Hit!!!!")
+                            game_attack_board[x][y - 1] = '*'
+                            self.active_player.board.print_board_data(game_attack_board)
+                            ships_exist = False
+                        
+                else:
+                    raise Exception("ERROR: Please enter a valid attack point")
             # if boat is sunk, destroy boat and make a ship sunk, set value of sunk ships + 1, display sunk boat 
             except ValueError:
                 raise Exception("\nThere was an error, please try again")
