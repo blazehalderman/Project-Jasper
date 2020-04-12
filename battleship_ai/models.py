@@ -141,12 +141,6 @@ class BoardClass:
                         if(board.game_board[x][head - 1] == -1):
                             board.game_board[x][head - 1] = temp_ship.ship_char
                             head += 2
-                            #piece_index = (y)
-                            #print(str(piece_index))
-                            #board.board_pieces[head].char = temp_ship.ship_char
-                            #board.board_data[y][head + x] = board.board_pieces[y].char
-                            #print("After " + board.board_data[y][head])
-                            #print("After " + board.board_pieces[y].char)
                         else:
                             break
                     self.print_board_data(self.game_board)
@@ -175,12 +169,6 @@ class BoardClass:
                             #piece placement after validation
                             board.game_board[head][y - 1] = temp_ship.ship_char
                             head += 2
-                            #piece_index = (y)
-                            #print(str(piece_index))
-                            #board.board_pieces[head].char = temp_ship.ship_char
-                            #board.board_data[y][head] = board.board_pieces[y].char
-                            #print("After " + board.board_data[y][head])
-                            #print("After " + board.board_pieces[y].char)
                         else:
                             break
                     self.print_board_data(self.game_board)
@@ -225,8 +213,7 @@ class ShipClass:
             except ValueError:
                 raise Exception("Invalid entry, please enter an alphanumeric character followed by a maximum of 2 digits (heigth, width) ex. A10 B10")
             except Exception as e:
-                print(e)  
-            # if player type is AI - same code as above(randomly generated cords)
+                print(e)
         
 #Player class
 class PlayerClass:
@@ -259,7 +246,6 @@ class PlayerClass:
         else:
             raise Exception("Please enter only 1 or 2 as your answer!")
         print("\n")
-
 
     #initiates default ship list
     def player_default_ship_init(self):
@@ -366,15 +352,7 @@ class BattleshipGameClass:
 
         active_player.player_board_init()
         active_player.player_default_ship_init()
-        #list boats size stored and types
-        #for i in active_player.default_ship_list:
-            #print(i.ship_length)
-            #print(i.ship_type)
         self.active_player = active_player
-
-    # sets player vs (player or AI)
-    # def game_type_set(self)
-        
     
     #game actions
     def game_start(self):
@@ -407,28 +385,32 @@ class BattleshipGameClass:
         while(ships_exist):
             #get user coord guess for attack action
             valid_cord = []
+
+            self.active_player.board.print_board_data(self.active_player.board.game_attack_board)
             str_split = input("\n\nPlease enter an attack coordinate\n\n coordinate: ")
             try:
                 for i in str_split.strip().split(' '):
                     valid_cord.append(i)
                 if(len(valid_cord) != 1):
                     raise Exception("\nERROR: Please enter only a single coordinate")
-                for i in range(len(valid_cord)):
-                    for j in range(len(valid_cord[i])):
-                        print(valid_cord[i][j])
                 #validate user coord
                 if ((valid_cord[0][0].isalpha() and valid_cord[0][0] <= self.active_player.board.max_row) and 
                     (valid_cord[0][1: len(valid_cord[0])].isnumeric() and int(valid_cord[0][1: len(valid_cord[0])]) <= self.active_player.board.max_col)):
-                        # check if spot has been guessed already, if the current point is a boat, check if is hit or miss
                         game_board = self.active_player.board.game_board
                         game_attack_board = self.active_player.board.game_attack_board
                         y = int(abs((ord(valid_cord[0][0]) - ord('@')) * 2) + 3)
                         x = int(valid_cord[0][1: len(valid_cord[0])]) * 2
-                        if(game_board[x][y - 1] != -1):
-                            print("It's a Hit!!!!")
+                        # check if spot has been guessed already, if the current point is a boat, check if is hit or miss
+                        if(game_board[x][y - 1] != -1 and game_attack_board[x][y - 1] == -1):
+                            print("\n(Ship name) has been hit!\n")
+                            game_attack_board[x][y - 1] = game_board[x][y - 1]
+                            #end of turn
+                        elif(game_board[x][y - 1] != -1 and game_attack_board[x][y - 1] != -1):
+                            print("\nSpot has already been guessed, please choose another coordinate\n")
+                        else:
+                            print("\n" + str(valid_cord[0][0: len(valid_cord[0])]) + " was a miss!\n")
                             game_attack_board[x][y - 1] = '*'
-                            self.active_player.board.print_board_data(game_attack_board)
-                            ships_exist = False
+                            #end of turn
                         
                 else:
                     raise Exception("ERROR: Please enter a valid attack point")
