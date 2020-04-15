@@ -382,8 +382,6 @@ class BattleshipGameClass:
         self.active_player.boat_placement()
         self.game_turn_start(self.turn_count)
         self.game_end()
-        
-        print("game is running!")
 
     def game_end(self):
         print("game has ended!")
