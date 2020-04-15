@@ -188,6 +188,7 @@ class ShipClass:
         self.ship_type = ship_type
         self.ship_char = ship_char
         self.ship_cord_store = []
+        self.ship_hit_count = 0
 
     #validates syntax of coordinates
     def ship_cord_validate(self, temp_ship, board):
@@ -323,12 +324,19 @@ class PlayerClass:
         while(len(self.board.boats_placed) < 5):
             self.default_ship_name_locate()
         print("All boats have been placed!")
+    
+    def ship_char_locate(self, boat_char):
+        print(self.default_ship_list)
+        for i in range(len(self.board.boats_placed)):
+            if(self.board.boats_placed[i].ship_char == boat_char):
+                return(i)
 
 # Battleship game class
 class BattleshipGameClass:
     # define players array
     def __init__(self):
         self.player_list = []
+        self.turn_count = 0
     
     def player_setup(self):
         active_player = PlayerClass()
@@ -372,21 +380,24 @@ class BattleshipGameClass:
         self.active_player.print_default_ship_list()
         # player ship placement
         self.active_player.boat_placement()
-        self.game_turn_start()
+        self.game_turn_start(self.turn_count)
+        self.game_end()
         
         print("game is running!")
 
     def game_end(self):
         print("game has ended!")
 
-    def game_turn_start(self):
+    def game_turn_start(self, turn_count):
         #while ships are on board
-        ships_exist = True
-        while(ships_exist):
+        ships_sunk = 0
+        while(ships_sunk != 5):
             #get user coord guess for attack action
             valid_cord = []
+            game_board = self.active_player.board.game_board
+            game_attack_board = self.active_player.board.game_attack_board
 
-            self.active_player.board.print_board_data(self.active_player.board.game_attack_board)
+            self.active_player.board.print_board_data(game_attack_board)
             str_split = input("\n\nPlease enter an attack coordinate\n\n coordinate: ")
             try:
                 for i in str_split.strip().split(' '):
@@ -396,14 +407,24 @@ class BattleshipGameClass:
                 #validate user coord
                 if ((valid_cord[0][0].isalpha() and valid_cord[0][0] <= self.active_player.board.max_row) and 
                     (valid_cord[0][1: len(valid_cord[0])].isnumeric() and int(valid_cord[0][1: len(valid_cord[0])]) <= self.active_player.board.max_col)):
-                        game_board = self.active_player.board.game_board
-                        game_attack_board = self.active_player.board.game_attack_board
                         y = int(abs((ord(valid_cord[0][0]) - ord('@')) * 2) + 3)
                         x = int(valid_cord[0][1: len(valid_cord[0])]) * 2
                         # check if spot has been guessed already, if the current point is a boat, check if is hit or miss
                         if(game_board[x][y - 1] != -1 and game_attack_board[x][y - 1] == -1):
-                            print("\n(Ship name) has been hit!\n")
+                            #boat locate for boat search to increase hit count
+                            boat_found = self.active_player.ship_char_locate(game_board[x][y - 1])
+                            #prints hit action
+                            print("\n" + self.active_player.board.boats_placed[boat_found].ship_type + " has been hit!\n")
+                            #boat hit
                             game_attack_board[x][y - 1] = game_board[x][y - 1]
+                            #increase boat_found count
+                            self.active_player.board.boats_placed[boat_found].ship_hit_count += 1
+                            #print current hit count
+                            #check if the current hit count matches the length of boat; boat sunk
+                            if(self.active_player.board.boats_placed[boat_found].ship_hit_count == 
+                                self.active_player.board.boats_placed[boat_found].ship_length):
+                                print("Ship sunk!")
+                                ships_sunk += 1
                             #end of turn
                         elif(game_board[x][y - 1] != -1 and game_attack_board[x][y - 1] != -1):
                             print("\nSpot has already been guessed, please choose another coordinate\n")
