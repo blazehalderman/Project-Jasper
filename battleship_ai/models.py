@@ -17,7 +17,10 @@ class BoardClass:
     def __init__(self, file):
         self.file = file
         self.board_data = []
-        self.view_board_data = []
+        self.raw_board_data = []
+        self.raw_attack_board_data = []
+        self.game_board = []
+        self.game_attack_board = []
         self.board_pieces = []
         self.boats_placed = []
         self.max_col = 10
@@ -32,28 +35,54 @@ class BoardClass:
 			    board_row.append(-1)
 		    board.append(board_row)'''
 
-    #prints current board file
-    def print_board_data(self):
-        count = 0
-        for i in range(len(self.view_board_data)):
-            print(self.view_board_data[i])
-            count += 1
-        print(count)
+    def create_game_board(self):
+        while("" in self.raw_board_data):
+            self.raw_board_data.remove("")
+        for i in range(len(self.raw_board_data)):
+            board_row = []
+            for j in range(len(self.raw_board_data[i])):
+                if(self.raw_board_data[i][j] == ' ' and i >= 2 and i <= 21 and j >= 4):
+                    board_row.append(-1)
+                else:
+                    board_row.append(self.raw_board_data[i][j])
+            self.game_board.append(board_row)
+
+    def create_game_attack_board(self):
+        while("" in self.raw_board_data):
+            self.raw_board_data.remove("")
+        for i in range(len(self.raw_board_data)):
+            board_row = []
+            for j in range(len(self.raw_board_data[i])):
+                if(self.raw_board_data[i][j] == ' ' and i >= 2 and i <= 21 and j >= 4):
+                    board_row.append(-1)
+                else:
+                    board_row.append(self.raw_board_data[i][j])
+            self.game_attack_board.append(board_row)
+
+    #prints game board
+    def print_board_data(self, board):
+        for i in range(len(board)):
+            for j in range(len(board[i])):
+                if(board[i][j] == -1):
+                    print(' ', end="")
+                else:
+                    print(board[i][j], end="")
+            print()
         print('\n')
 
+    #print game board file
     def print_board_file(self):
         with open(self.file) as f:
             print(f.read() + "\n\n")
         f.closed
 
-    #reads a file and saves data into 2d array
+    #reads a file and saves data into 2d array - for game board population
     def read_board_file(self):
         with open(self.file) as f:
             #self.view_board_data = [line.split('\n') for line in f]
             for line in f:
-                for j in line.split('\n'):
-                    self.view_board_data.append(j)
-
+                for i in line.split('\n'):
+                    self.raw_board_data.append(i)
             for line in f:
                 for i in line.strip().split('\n'):
                     self.board_data.append(i)
@@ -79,6 +108,28 @@ class BoardClass:
         #for i in self.board_pieces:
             #print(str(i.rowX) + ' ' + str(i.colY))
     
+    def place_ship_validate_x(self, temp_ship, board, dist, head, y):
+        if(board.game_board[head][y - 1] == -1):
+            for x in range(dist):
+                if(board.game_board[head][y - 1] == -1):
+                    head += 2
+                else:
+                    return(False)
+            return(True)
+        else:
+            return (False)
+
+    def place_ship_validate_y(self, temp_ship, board, dist, head, x):
+        if(board.game_board[x][head - 1] == -1):
+            for d in range(dist):
+                if(board.game_board[x][head - 1] == -1):
+                    head += 2
+                else:
+                    return(False)
+            return(True)
+        else:
+            return(False)
+
     #completes validation of coords and places ship on board
     def place_ship_board(self, valid_cord, temp_ship, board):
         #loop through board
@@ -87,25 +138,22 @@ class BoardClass:
             if(dist == temp_ship.ship_length):
                 #if the row specified first is greater, make second head
                 if(valid_cord[0][0] > valid_cord[1][0]):
-                    head = int(ord(valid_cord[0][1]) - ord('@') + 3)
+                    head = int(abs((ord(valid_cord[0][1]) - ord('@')) * 2) + 3)
                 else:
-                    head = int(ord(valid_cord[0][0]) - ord('@') + 3)
-                #placing piece on board
-                y = int(valid_cord[0][1: len(valid_cord[0])]) * 4
-                print(str(head) + ' ' +str(y))
-                #place data for board pieces
-                board.print_board_data
-                print(head)
-                print(y)
-                #print(board.view_board_data)
-                board.view_board_data[y][head]
-                print(board.view_board_data[y])
-                #for y in range(dist):
-                    #print(board.view_board_data[head + x][y])
-                    #board.board_pieces[head].char = temp_ship.ship_char
-                    #print(board.board_pieces[head].char)
-                    
-                print("ship fits")
+                    head = int(abs((ord(valid_cord[0][0]) - ord('@')) * 2) + 3)
+                x = int(valid_cord[0][1: len(valid_cord[0])]) * 2
+                #validation for future placement
+                if(self.place_ship_validate_y(temp_ship, board, dist, head, x)):
+                    for d in range(dist):
+                        if(board.game_board[x][head - 1] == -1):
+                            board.game_board[x][head - 1] = temp_ship.ship_char
+                            head += 2
+                        else:
+                            break
+                    self.print_board_data(self.game_board)
+                else:
+                    self.print_board_data(self.game_board)
+                    raise Exception("Coordinates overlap an existing ship")
                 return(False)
             else:
                 raise Exception("ERROR: Invalid entry, (" + valid_cord[0][0] + ", " + valid_cord[0][1: len(valid_cord[1])] + "), " + 
@@ -115,10 +163,25 @@ class BoardClass:
                 dist = abs(int(valid_cord[0][1: len(valid_cord[0])]) - int(valid_cord[1][1 : len(valid_cord[1])])) + 1
             else:
                 dist = abs(int(valid_cord[0][1]) - int(valid_cord[1][1])) + 1
-                print(dist)
             if(dist == temp_ship.ship_length):
-                
-                print("ship fits")
+                if(int(valid_cord[0][1: len(valid_cord[0])]) > int(valid_cord[1][1 : len(valid_cord[1])])):
+                    head = (int(valid_cord[1][1 : len(valid_cord[1])]) * 2)
+                else:
+                    head = (int(valid_cord[0][1: len(valid_cord[0])]) * 2)
+                y = int(abs((ord(valid_cord[0][0]) - ord('@')) * 2) + 3)
+                #validation for future placement
+                if(self.place_ship_validate_x(temp_ship, board, dist, head, y)):
+                    for x in range(dist):
+                        if(board.game_board[head][y - 1] == -1):
+                            #piece placement after validation
+                            board.game_board[head][y - 1] = temp_ship.ship_char
+                            head += 2
+                        else:
+                            break
+                    self.print_board_data(self.game_board)
+                else:
+                    self.print_board_data(self.game_board)
+                    raise Exception("Coordinates overlap an existing ship")
                 return(False)
             else:
                 raise Exception("ERROR: Invalid entry, does not meet boat size. ("+ valid_cord[0][0: len(valid_cord[0])] + ")" + 
@@ -132,11 +195,13 @@ class ShipClass:
         self.ship_type = ship_type
         self.ship_char = ship_char
         self.ship_cord_store = []
+        self.ship_hit_count = 0
 
     #validates syntax of coordinates
     def ship_cord_validate(self, temp_ship, board):
         d = True
         while(d):
+            # if player type is player
             valid_cord = []
             temp_cords = input("\nPlease select coordinate range for - \n\n" + temp_ship.ship_type + 
             "\nsize: " + str(temp_ship.ship_length) + "\n\ncoordinates:")
@@ -147,17 +212,16 @@ class ShipClass:
                     raise Exception("ERROR: Invalid entry, Please enter no more/less then a cord pair (A2 B2)")
 
                 if ((valid_cord[0][0].isalpha() and valid_cord[0][0] <= board.max_row) and (valid_cord[1][0].isalpha() and valid_cord[1][0] <= board.max_row) and 
-                (valid_cord[1][1: len(valid_cord[1])].isnumeric() and int(valid_cord[1][1: len(valid_cord[1])]) <= board.max_col) and (valid_cord[1][1: len(valid_cord[1])].isnumeric() and int(valid_cord[1][1: len(valid_cord[1])]) <= board.max_col)):
+                (valid_cord[0][1: len(valid_cord[0])].isnumeric() and int(valid_cord[0][1: len(valid_cord[0])]) <= board.max_col) and (valid_cord[1][1: len(valid_cord[1])].isnumeric() and int(valid_cord[1][1: len(valid_cord[1])]) <= board.max_col)):
                     #if valid_cord[0][0] is in the same col as valid_cord[1][0] and +length, -length(up or down max)
                     #return true or false
-                    print("HERE")
                     d = board.place_ship_board(valid_cord, temp_ship, board)
                 else:
                     raise Exception("ERROR: Invalid entry, Please enter valid cords (height, width) ex. A2 B2")
             except ValueError:
                 raise Exception("Invalid entry, please enter an alphanumeric character followed by a maximum of 2 digits (heigth, width) ex. A10 B10")
             except Exception as e:
-                print(e)  
+                print(e)
         
 #Player class
 class PlayerClass:
@@ -176,17 +240,20 @@ class PlayerClass:
             board_file = BoardClass("board.txt")
             board_file.read_board_file()
             board_file.clean_board_file()
+            board_file.create_game_board()
+            board_file.create_game_attack_board()
             self.board = board_file
         elif(board_type == '2'):
             board = input("Please enter custom map file(in this directory): ")
             board_file = BoardClass(board)
             board_file.read_board_file()
             board_file.clean_board_file()
+            board_file.create_game_board()
+            board_file.create_game_attack_board()
             self.board = board_file
         else:
             raise Exception("Please enter only 1 or 2 as your answer!")
         print("\n")
-
 
     #initiates default ship list
     def player_default_ship_init(self):
@@ -203,6 +270,29 @@ class PlayerClass:
         ship_list.append(ship_patrol)
         self.default_ship_list = ship_list
 
+    def print_default_ship_list(self):
+        if(self.default_ship_list):
+            i = 1
+            print("name:\t   " + self.default_ship_list[0].ship_type, end='')
+            while(i < len(self.default_ship_list)):
+                print("\t" + self.default_ship_list[i].ship_type, end='')
+                i +=1
+            print()
+            i = 1
+            print("ref:\t        " + self.default_ship_list[0].ship_char, end='')
+            while(i < len(self.default_ship_list)):
+                print("\t        " + self.default_ship_list[i].ship_char, end='')
+                i+=1
+            print()
+            i = 1
+            print("size:\t        " + str(self.default_ship_list[0].ship_length), end='')
+            while(i < len(self.default_ship_list)):
+                print("\t        " + str(self.default_ship_list[i].ship_length), end='')
+                i+=1
+            print()
+        else:
+            return
+
     #Searches default ship piece
     def default_ship_name_locate(self):
         state = True
@@ -213,6 +303,7 @@ class PlayerClass:
                 if(len(temp_input) != 1):
                     raise Exception("Invalid entry, please review ship ref and try again")
                 else:
+                    i = 0
                     for boat in self.default_ship_list:
                         if(boat.ship_char == temp_input):
                             boat_found = True
@@ -220,9 +311,14 @@ class PlayerClass:
                             boat.ship_cord_validate(boat, self.board)
                             #appends boat to new boat array
                             self.board.boats_placed.append(boat)
+                            self.default_ship_list.pop(i)
+                            self.print_default_ship_list()
                             state = False
                             break
-                        if (not boat_found):
+                        else:
+                            i+=1
+                            continue
+                    if (not boat_found):
                             raise Exception("Invalid entry, please review ship ref and try again")
             except ValueError:
                 raise Exception("Invalid entry, please review ship ref and try again")
@@ -232,15 +328,22 @@ class PlayerClass:
         #boat placement
     def boat_placement(self):
         # place all 5 default boats
-        while(len(self.board.boats_placed) != 5):
+        while(len(self.board.boats_placed) < 5):
             self.default_ship_name_locate()
-        return
+        print("All boats have been placed!")
+    
+    def ship_char_locate(self, boat_char):
+        print(self.default_ship_list)
+        for i in range(len(self.board.boats_placed)):
+            if(self.board.boats_placed[i].ship_char == boat_char):
+                return(i)
 
 # Battleship game class
 class BattleshipGameClass:
     # define players array
     def __init__(self):
         self.player_list = []
+        self.turn_count = 0
     
     def player_setup(self):
         active_player = PlayerClass()
@@ -264,12 +367,7 @@ class BattleshipGameClass:
 
         active_player.player_board_init()
         active_player.player_default_ship_init()
-        #list boats size stored and types
-        #for i in active_player.default_ship_list:
-            #print(i.ship_length)
-            #print(i.ship_type)
-        
-        return(active_player)
+        self.active_player = active_player
     
     #game actions
     def game_start(self):
@@ -281,24 +379,72 @@ class BattleshipGameClass:
         "|_.__/ \__,_|\__|\__|_|\___||___/_| |_|_|  __/ \n" +
         "                                        | |    \n" +
         "                                        |_|   ")
-        player = self.player_setup()
+        # player creation
+        self.player_setup()
 
-        # implement into move functions
-        player.board.print_board_file()
-        print("\tAircraft Carrier\tBattleship\tDestroyer\tSubmarine\tPatrol Boat\n" +
-        "ref:\t       A\t\t    B\t\t    D\t\t    S\t\t     P\n" +
-        "size:\t       5\t\t    4\t\t    4\t\t    3\t\t     2\n" + 
-        "piece:\t     <000>\t\t  <00>\t\t  <00>\t\t   <0>\t\t    <>\n")
-        # ship coordinate validate(move to player class function)
-        player.boat_placement()
-        
-        print("game is running!")
+        #create computer/AI(basic ai for now) or another player
+        self.active_player.board.print_board_file()
+        self.active_player.print_default_ship_list()
+        # player ship placement
+        self.active_player.boat_placement()
+        self.game_turn_start(self.turn_count)
+        self.game_end()
 
     def game_end(self):
         print("game has ended!")
 
-    def game_end_turn(self):
-        print("turn has ended")
+    def game_turn_start(self, turn_count):
+        #while ships are on board
+        ships_sunk = 0
+        while(ships_sunk != 5):
+            #get user coord guess for attack action
+            valid_cord = []
+            game_board = self.active_player.board.game_board
+            game_attack_board = self.active_player.board.game_attack_board
+
+            self.active_player.board.print_board_data(game_attack_board)
+            str_split = input("\n\nPlease enter an attack coordinate\n\n coordinate: ")
+            try:
+                for i in str_split.strip().split(' '):
+                    valid_cord.append(i)
+                if(len(valid_cord) != 1):
+                    raise Exception("\nERROR: Please enter only a single coordinate")
+                #validate user coord
+                if ((valid_cord[0][0].isalpha() and valid_cord[0][0] <= self.active_player.board.max_row) and 
+                    (valid_cord[0][1: len(valid_cord[0])].isnumeric() and int(valid_cord[0][1: len(valid_cord[0])]) <= self.active_player.board.max_col)):
+                        y = int(abs((ord(valid_cord[0][0]) - ord('@')) * 2) + 3)
+                        x = int(valid_cord[0][1: len(valid_cord[0])]) * 2
+                        # check if spot has been guessed already, if the current point is a boat, check if is hit or miss
+                        if(game_board[x][y - 1] != -1 and game_attack_board[x][y - 1] == -1):
+                            #boat locate for boat search to increase hit count
+                            boat_found = self.active_player.ship_char_locate(game_board[x][y - 1])
+                            #prints hit action
+                            print("\n" + self.active_player.board.boats_placed[boat_found].ship_type + " has been hit!\n")
+                            #boat hit
+                            game_attack_board[x][y - 1] = game_board[x][y - 1]
+                            #increase boat_found count
+                            self.active_player.board.boats_placed[boat_found].ship_hit_count += 1
+                            #print current hit count
+                            #check if the current hit count matches the length of boat; boat sunk
+                            if(self.active_player.board.boats_placed[boat_found].ship_hit_count == 
+                                self.active_player.board.boats_placed[boat_found].ship_length):
+                                print("Ship sunk!")
+                                ships_sunk += 1
+                            #end of turn
+                        elif(game_board[x][y - 1] != -1 and game_attack_board[x][y - 1] != -1):
+                            print("\nSpot has already been guessed, please choose another coordinate\n")
+                        else:
+                            print("\n" + str(valid_cord[0][0: len(valid_cord[0])]) + " was a miss!\n")
+                            game_attack_board[x][y - 1] = '*'
+                            #end of turn
+                        
+                else:
+                    raise Exception("ERROR: Please enter a valid attack point")
+            # if boat is sunk, destroy boat and make a ship sunk, set value of sunk ships + 1, display sunk boat 
+            except ValueError:
+                raise Exception("\nThere was an error, please try again")
+            except Exception as e:
+                print(e) 
 
     def game_set_winner(self):
         print("winner is ")
