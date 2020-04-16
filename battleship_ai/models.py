@@ -24,6 +24,13 @@ class BoardClass:
         self.max_row = 'J'
 
     #CREATE FUNCTION FOR RUNNING ALL FUNCTIONS
+    #CREATE A NEW BLANK BOARD AND FILL WITH BOATS ETC
+        '''board = []
+	    for i in range(10):
+		    board_row = []
+		    for j in range(10):
+			    board_row.append(-1)
+		    board.append(board_row)'''
 
     #prints current board file
     def print_board_data(self):
