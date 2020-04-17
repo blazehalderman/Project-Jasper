@@ -335,6 +335,7 @@ class PlayerClass:
     def boat_placement(self):
         # place all 5 default boats
         while(len(self.board.boats_placed) < 5):
+            print("BOATS BEING PLACED")
             self.default_ship_name_locate()
         print("All boats have been placed!")
     
@@ -376,14 +377,16 @@ class BattleshipGameClass:
         self.active_player = active_player
     
     def computer_setup(self):
+        #creates new player object
         computer_player = PlayerClass()
+        #initates player_computer on player class
         self.active_player.player_computer_init(computer_player)
+        #assigns board to player_computer
         self.active_player.player_board_init()
         #assign default ships to player_computer
         self.active_player.computer_player.player_default_ship_init()
         #adjust boat placement with predefined values for placement - later implement AI
         self.active_player.computer_player.boat_placement()
-        self.active_player.player_computer_init(computer_player)
 
     #game actions
     def game_start(self):
