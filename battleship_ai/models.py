@@ -228,25 +228,28 @@ class PlayerClass:
 
     #initiates player board
     def player_board_init(self):
-        board_type = input("\nPlease enter the type of Battleship map\n\n\t1: Default\t2:Custom\n\nType: ")
-        if(board_type == '1'):
-            board_file = BoardClass("board.txt")
-            board_file.read_board_file()
-            #board_file.clean_board_file()
-            board_file.create_game_board()
-            board_file.create_game_attack_board()
-            self.board = board_file
-        elif(board_type == '2'):
-            board = input("Please enter custom map file(in this directory): ")
-            board_file = BoardClass(board)
-            board_file.read_board_file()
-            #board_file.clean_board_file()
-            board_file.create_game_board()
-            board_file.create_game_attack_board()
-            self.board = board_file
+        if(hasattr(self, "computer_player")):
+            self.computer_player.board = self.board
         else:
-            raise Exception("Please enter only 1 or 2 as your answer!")
-        print("\n")
+            board_type = input("\nPlease enter the type of Battleship map\n\n\t1: Default\t2:Custom\n\nType: ")
+            if(board_type == '1'):
+                board_file = BoardClass("board.txt")
+                board_file.read_board_file()
+                #board_file.clean_board_file()
+                board_file.create_game_board()
+                board_file.create_game_attack_board()
+                self.board = board_file
+            elif(board_type == '2'):
+                board = input("Please enter custom map file(in this directory): ")
+                board_file = BoardClass(board)
+                board_file.read_board_file()
+                #board_file.clean_board_file()
+                board_file.create_game_board()
+                board_file.create_game_attack_board()
+                self.board = board_file
+            else:
+                raise Exception("Please enter only 1 or 2 as your answer!")
+            print("\n")
 
     #initiates default ship list
     def player_default_ship_init(self):
@@ -294,29 +297,35 @@ class PlayerClass:
         state = True
         boat_found = False
         while(state):
-            #if player, ask for input. Else continue
-            temp_input = input("\nBoat Placement\nSelect a boat to place (Ref): ")
+            #if player, ask for input
+            if(hasattr(self, "computer_player")):
+                print("COMPUTER DECISION")
+                index = random.choice(self.default_ship_list)
+                char_input = self.default_ship_list[index].ship_char
+                print(char_input)
+            else:
+                # else computer, makes choice
+                char_input = input("\nBoat Placement\nSelect a boat to place (Ref): ")
+                if(len(char_input) != 1):
+                        raise Exception("Invalid entry, please review ship ref and try again")
             try:
-                if(len(temp_input) != 1):
-                    raise Exception("Invalid entry, please review ship ref and try again")
-                else:
-                    i = 0
-                    for boat in self.default_ship_list:
-                        if(boat.ship_char == temp_input):
-                            boat_found = True
-                            print(boat.ship_type + " ship located")
-                            boat.ship_cord_validate(boat, self.board)
-                            #appends boat to new boat array
-                            self.board.boats_placed.append(boat)
-                            self.default_ship_list.pop(i)
-                            self.print_default_ship_list()
-                            state = False
-                            break
-                        else:
-                            i+=1
-                            continue
-                    if (not boat_found):
-                            raise Exception("Invalid entry, please review ship ref and try again")
+                i = 0
+                for boat in self.default_ship_list:
+                    if(boat.ship_char == char_input):
+                        boat_found = True
+                        print(boat.ship_type + " ship located")
+                        boat.ship_cord_validate(boat, self.board)
+                        #appends boat to new boat array
+                        self.board.boats_placed.append(boat)
+                        self.default_ship_list.pop(i)
+                        self.print_default_ship_list()
+                        state = False
+                        break
+                    else:
+                        i+=1
+                        continue
+                if (not boat_found):
+                        raise Exception("Invalid entry, please review ship ref and try again")
             except ValueError:
                 raise Exception("Invalid entry, please review ship ref and try again")
             except Exception as e:
@@ -368,10 +377,12 @@ class BattleshipGameClass:
     
     def computer_setup(self):
         computer_player = PlayerClass()
-        computer_player.player_board_init()
-        computer_player.player_default_ship_init()
+        self.active_player.player_computer_init(computer_player)
+        self.active_player.player_board_init()
+        #assign default ships to player_computer
+        self.active_player.computer_player.player_default_ship_init()
         #adjust boat placement with predefined values for placement - later implement AI
-        computer_player.boat_placement()
+        self.active_player.computer_player.boat_placement()
         self.active_player.player_computer_init(computer_player)
 
     #game actions
@@ -391,13 +402,14 @@ class BattleshipGameClass:
         self.active_player.print_default_ship_list()
         # player ship placement
         self.active_player.boat_placement()
+        self.computer_setup()
         #While(not game_win or game_end)
         #While game win or game end doesnt exist continue playing
         #player turn
         self.game_turn_start(self.active_player, self.turn_count)
         #print board data
         #computer turn
-        #self.game_turn_start(computer_player, self.turn_count)
+        self.game_turn_start(self.active_player.computer_player, self.turn_count)
         #print board data
         self.game_end()
 
@@ -411,10 +423,10 @@ class BattleshipGameClass:
         while(state):
             #get user coord guess for attack action
             valid_cord = []
-            game_board = self.active_player.board.game_board
-            game_attack_board = self.active_player.board.game_attack_board
+            game_board = player.board.game_board
+            game_attack_board = player.board.game_attack_board
 
-            self.active_player.board.print_board_data(game_attack_board)
+            player.board.print_board_data(game_attack_board)
             str_split = input("\n\nPlease enter an attack coordinate\n\n coordinate: ")
             try:
                 for i in str_split.strip().split(' '):
@@ -422,23 +434,23 @@ class BattleshipGameClass:
                 if(len(valid_cord) != 1):
                     raise Exception("\nERROR: Please enter only a single coordinate")
                 #validate user coord
-                if ((valid_cord[0][0].isalpha() and valid_cord[0][0] <= self.active_player.board.max_row) and 
-                    (valid_cord[0][1: len(valid_cord[0])].isnumeric() and int(valid_cord[0][1: len(valid_cord[0])]) <= self.active_player.board.max_col)):
+                if ((valid_cord[0][0].isalpha() and valid_cord[0][0] <= player.board.max_row) and 
+                    (valid_cord[0][1: len(valid_cord[0])].isnumeric() and int(valid_cord[0][1: len(valid_cord[0])]) <= player.board.max_col)):
                         y = int(abs((ord(valid_cord[0][0]) - ord('@')) * 2) + 3)
                         x = int(valid_cord[0][1: len(valid_cord[0])]) * 2
                         # check if spot has been guessed already, if the current point is a boat, check if is hit or miss
                         if(game_board[x][y - 1] != -1 and game_attack_board[x][y - 1] == -1):
                             #boat locate for boat search to increase hit count
-                            boat_found = self.active_player.ship_char_locate(game_board[x][y - 1])
+                            boat_found = player.ship_char_locate(game_board[x][y - 1])
                             #prints hit action
-                            print("\n" + self.active_player.board.boats_placed[boat_found].ship_type + " has been hit!\n")
+                            print("\n" + player.board.boats_placed[boat_found].ship_type + " has been hit!\n")
                             #boat hit action
                             game_attack_board[x][y - 1] = game_board[x][y - 1]
                             #increase ship_hit count
-                            self.active_player.board.boats_placed[boat_found].ship_hit_count += 1
+                            player.board.boats_placed[boat_found].ship_hit_count += 1
                             #check if the current hit count matches the length of boat; boat sunk
-                            if(self.active_player.board.boats_placed[boat_found].ship_hit_count == 
-                                self.active_player.board.boats_placed[boat_found].ship_length):
+                            if(player.board.boats_placed[boat_found].ship_hit_count == 
+                                player.board.boats_placed[boat_found].ship_length):
                                 print("Ship sunk!")
                                 #ships_sunk += 1
                             #end of turn
