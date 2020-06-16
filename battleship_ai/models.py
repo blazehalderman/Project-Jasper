@@ -1,4 +1,5 @@
-import random
+import random, json, os
+from os import path
 
 # models for game pieces, players, ships, board(s)
 
@@ -222,9 +223,54 @@ class PlayerClass:
         self
     
     #initiates player name
-    def player_name_init(self):
-        player_name = input("\nWelcome to Battleship! Please enter your name: ")
-        self.name = player_name
+    def player_name_init(self, current_player_list):
+        while(True):
+            try:
+                if((path.exists('users.JSON') and path.getsize('users.JSON') <= 2) or (path.exists('users.JSON') == False)):
+                    print("\n\nWelcome to Battleship! \n\nThis is your first time opening the application, please create a new user!\n")
+                    action = 'n'
+                    usr_f = open('users.JSON', 'w')
+                    new_user = {}
+                    username = input("Please enter your new username: ")
+                    new_user['username'] = username
+                    self.name = username
+                    current_player_list.append(new_user)
+                    usr_f.write(json.dumps(current_player_list))
+                    usr_f.close()
+                    print("\nUser Created Successfully!")
+                    return(current_player_list)
+                else:
+                    action = input("\n\nWelcome to Battleship!\n\n'n': New User\n'e': Existing User\ninput: ")
+                    if(path.exists('users.JSON') and path.getsize('users.JSON') > 2 and action == 'e'):
+                        player_name = input("\nPlease enter your username: ")
+                        with open('users.JSON', 'r') as usr_f:
+                            retrieved_users = json.load(usr_f)
+                        #search through retrieved dictionary
+                        for i in range(len(retrieved_users)):
+                            #if user exists
+                            if(retrieved_users[i]['username'] == player_name):
+                                self.name = player_name
+                                return(current_player_list)
+                    elif(action == 'n'):
+                        with open('users.JSON', 'w') as usr_f:
+                            new_user = {}
+                            username = input("\nPlease enter your new username: ")
+                            new_user['username'] = username
+                            self.name = username
+                            current_player_list.append(new_user)
+                            usr_f.write(json.dumps(current_player_list))
+                        print("\nUser Created Successfully!")
+                        return(current_player_list)
+                    #administrative access - admin pass created on first execution
+                    #elif(action == 'a'):
+                    #    admin_pass = input('Please provide administrator password: ')
+                    #    if():
+                    else:
+                        raise Exception("Invalid entry, please enter 'e' or 'n'\n")
+            except ValueError:
+                    raise Exception("Invalid entry, please try again")
+            except Exception as e:
+                print(e)
 
     #initiates player board
     def player_board_init(self):
@@ -335,29 +381,21 @@ class PlayerClass:
 class BattleshipGameClass:
     # define players array
     def __init__(self):
-        self.player_list = []
+        #counts turns in game
         self.turn_count = 0
-    
+
     def player_setup(self):
         active_player = PlayerClass()
-        state = False
-        while(not state):    
-            active_player.player_name_init()
-            try:
-                if(len(self.player_list) > 0):
-                    for player in self.player_list:
-                        if (player.name == active_player.name):
-                            print("\nPlayer found! Welcome back, " + player.name)
-                            active_player = player
-                            state = True
-                            break
-                else:
-                    self.player_list.append(active_player)
-                    print("\nThis is a new user, welcome " + active_player.name + "!")
-                    state = True
-            except NameError:
-                raise Exception("\nThere was an error, please try again")
-
+        #checks if there are existing users, requests usersname
+        if(path.exists('users.JSON') and path.getsize('users.JSON') > 2):
+            with open('users.JSON', 'r') as usr_f:
+                self.player_list = json.load(usr_f)
+            self.player_list = active_player.player_name_init(self.player_list)
+            print(self.player_list)
+        else:
+            self.player_list = []
+            self.player_list = active_player.player_name_init(self.player_list)
+        #initializes board, ships, sets active player
         active_player.player_board_init()
         active_player.player_default_ship_init()
         self.active_player = active_player
